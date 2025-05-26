@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<input type="text" id="title" placeholder="제목 입력" /><br>
+<textarea id="content" placeholder="내용 입력"></textarea><br>
+<input type="password" id="password" placeholder="비밀번호 입력" /><br>
+<button onclick="sendPost()">전송</button><br><br>
+
+<button onclick="requestBoard()">목록 불러오기</button> <br>
+
+<div class="list"></div>
+</body>
+<script>
+    const boardDiv = document.querySelector('.list');
+    function requestBoard() {
+        while ( boardDiv.hasChildNodes() ) {
+            boardDiv.removeChild(boardDiv.firstChild);
+        }
+        fetch("boards").then((response) => response.json())
+            .then((data) => {
+                data.forEach(element => {
+                    console.log(data)
+                    const newDiv = document.createElement("div");
+                    const h = document.createElement("h3");
+                    h.textContent = element.title;
+                    const pn = document.createElement("p");
+                    pn.textContent = element.name;
+                    const span = document.createElement("span");
+                    span.textContent = element.content;
+                    const date = document.createElement("p");
+                    date.textContent = element.createdAt;
+                    newDiv.appendChild(h);
+                    newDiv.appendChild(pn);
+                    newDiv.appendChild(span);
+                    newDiv.appendChild(date);
+
+                    boardDiv.appendChild(newDiv);
+                })
+
+            })
+
+    }
+
+
+    function sendPost() {
+        const data = {
+            title: document.getElementById("title").value,
+            content: document.getElementById("content").value,
+            password: document.getElementById("password").value
+        };
+
+        fetch('/boards', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'  // JSON 타입 명시
+            },
+            body: JSON.stringify(data)  // 자바스크립트 객체를 JSON 문자열로 변환
+        })
+            .then(response => {
+                if (response.ok) return response.json();
+                else throw new Error('네트워크 응답 문제');
+            })
+            .then(result => {
+                console.log('성공:', result);
+                // alert("전송 성공!");
+            })
+            .catch(error => {
+                console.error('실패:', error);
+                // alert("전송 실패!");
+            });
+    }
+</script>
+</html>
